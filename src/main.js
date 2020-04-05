@@ -4,6 +4,14 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 
+
+//引入element-ui
+import ElementUI from 'element-ui'; //引入核心js组件
+import 'element-ui/lib/theme-chalk/index.css';//引入依赖的样式
+Vue.use(ElementUI) //引用
+
+
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
