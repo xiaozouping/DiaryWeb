@@ -9,10 +9,12 @@
 
       <el-form-item label="密码" prop="password" class="pwd">
         <el-input type="password" placeholder="请输入密码" v-model="loginData.password"/>
-        <router-link to="/forgetpwd" class="forget">忘记密码</router-link>
+        <el-tooltip class="item" effect="dark" content="请联系超级管理员修改密码！" placement="bottom-start">
+          <div class="forget">忘记密码?</div>
+        </el-tooltip>
       </el-form-item>
 
-      <el-form-item>
+      <el-form-item label-width="30px">
         <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
         <el-button @click="resetForm('loginForm')">重置</el-button>
       </el-form-item>
@@ -28,6 +30,7 @@
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
+
   </div>
 </template>
 
@@ -131,15 +134,17 @@
   .pwd {
     position: relative;
   }
-
   .forget {
     color: red;
-    font-size: 13px;
+    font-size: 12px;
     position: absolute;
     right: 0;
-    top: 35px;
+    top: 43px;
+    height: 17px;
+    line-height: 17px;
+    text-decoration: underline;
+    cursor: pointer;
   }
-
   .el-form-item {
     margin-left: -10px;
   }
