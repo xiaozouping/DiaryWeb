@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import Login from "../views/Login"
-import Main from "../views/Main"
+import Index from "../views/Index"
 
 Vue.use(Router)
 
@@ -19,9 +19,8 @@ export default new Router({
       component: Login
     },
     {
-      path:'/main',
-      name:'首页',
-      component:Main
+      path:'/index',
+      component:Index
     }
   ]
 })
