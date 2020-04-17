@@ -21,16 +21,14 @@
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
+
                         <template slot="title">
                             <i :class="item.icon"></i>
                             <span slot="title">{{ item.title }}</span>
                         </template>
+
                         <template v-for="subItem in item.subs">
-                            <el-submenu
-                                v-if="subItem.subs"
-                                :index="subItem.index"
-                                :key="subItem.index"
-                            >
+                            <el-submenu v-if="subItem.subs" :index="subItem.index" :key="subItem.index" >
                                 <template slot="title">{{ subItem.title }}</template>
                                 <el-menu-item
                                     v-for="(threeItem,i) in subItem.subs"
@@ -38,11 +36,10 @@
                                     :index="threeItem.index"
                                 >{{ threeItem.title }}</el-menu-item>
                             </el-submenu>
-                            <el-menu-item
-                                v-else
-                                :index="subItem.index"
-                                :key="subItem.index"
-                            >{{ subItem.title }}</el-menu-item>
+
+                            <el-menu-item v-else :index="subItem.index" :key="subItem.index">
+                              {{ subItem.title }}
+                            </el-menu-item>
                         </template>
                     </el-submenu>
                 </template>
@@ -65,104 +62,36 @@ export default {
             collapse: false,
             items: [
                 {
-                    icon: 'el-icon-lx-home',
-                    index: 'dashboard',
-                    title: '系统首页'
+                    icon: 'el-icon-s-home',
+                    index: 'homepage',
+                    title: '首页'
                 },
                 {
-                    icon: 'el-icon-lx-cascades',
-                    index: 'ordermanage',
-                    title: '订单管理'
+                    icon: 'el-icon-s-order',
+                    index: '2',
+                    title: '订单管理',
+                    subs: [
+                        {
+                            index: 'ordermanage',
+                            title: '订单信息'
+                        }
+                    ]
                 },
                 {
-                    icon:'el-icon-bell',
+                    icon:'el-icon-message',
                     index:'messagecenter',
                     title:'消息中心'
                 },
-                // {
-                //     icon: 'el-icon-lx-copy',
-                //     index: 'tabs',
-                //     title: 'tab选项卡'
-                // },
                 {
-                    icon: 'el-icon-lx-calendar',
-                    index: '3',
-                    title: '表单相关',
+                    icon: 'el-icon-s-custom',
+                    index: '4',
+                    title: '管理员管理',
                     subs: [
                         {
-                            index: 'form',
-                            title: '基本表单'
-                        },
-                        {
-                            index: '3-2',
-                            title: '三级菜单',
-                            subs: [
-                                {
-                                    index: 'editor',
-                                    title: '富文本编辑器'
-                                },
-                                {
-                                    index: 'markdown',
-                                    title: 'markdown编辑器'
-                                }
-                            ]
-                        },
-                        {
-                            index: 'upload',
-                            title: '文件上传'
+                            index: 'adminmanage',
+                            title: '管理员信息'
                         }
                     ]
-                },
-                {
-                    icon: 'el-icon-lx-emoji',
-                    index: 'adminmanage',
-                    title: '管理员管理'
-                },
-                {
-                    icon: 'el-icon-pie-chart',
-                    index: 'charts',
-                    title: 'schart图表'
-                },
-                {
-                    icon: 'el-icon-rank',
-                    index: '6',
-                    title: '拖拽组件',
-                    subs: [
-                        {
-                            index: 'drag',
-                            title: '拖拽列表'
-                        },
-                        {
-                            index: 'dialog',
-                            title: '拖拽弹框'
-                        }
-                    ]
-                },
-                {
-                    //其实不太需要
-                    icon: 'el-icon-lx-global',
-                    index: 'i18n',
-                    title: '国际化功能'
-                },
-                {
-                    icon: 'el-icon-lx-warn',
-                    index: '7',
-                    title: '错误处理',
-                    subs: [
-                        {
-                            index: 'permission',
-                            title: '权限测试'
-                        },
-                        {
-                            index: '404',
-                            title: '404页面'
-                        }
-                    ]
-                },
-                {
-                    icon: 'el-icon-lx-redpacket_fill',
-                    index: '/donate',
-                    title: '支持作者'
                 }
             ]
         };

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../components/common/Home.vue';
-// import Dashboard from '../components/page/Dashboard';
+import HomePage from '../components/page/HomePage';
 // import Icon from "../components/page/Icon";
 import OrderManage from "../components/page/OrderManage";
 import MessageCenter from "../components/page/MessageCenter";
@@ -26,18 +26,18 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/404'
+      redirect: '/homepage'
     },
     {
       path:'/',
       component:Home,
-      meta: { title: '自述文件' },
+      meta: { title: '公共组件' },
       children:[
-        // {
-        //   path: '/dashboard',
-        //   component: Dashboard,
-        //   meta: { title: '系统首页' }
-        // },
+        {
+          path: '/homepage',
+          component: HomePage,
+          meta: { title: '首页' }
+        },
         {
           path: '/ordermanage',
           component: OrderManage,
@@ -46,7 +46,7 @@ export default new Router({
         {
           path: '/adminmanage',
           component: AdminManage,
-          meta: { title: '管理员管理' ,permission: true}
+          meta: { title: '管理员管理' , permission: true}
           //只有超级管理员才能管理管理员
         },
         {

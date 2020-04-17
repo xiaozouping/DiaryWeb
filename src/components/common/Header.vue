@@ -48,10 +48,11 @@
                     </span>
 <!--                    下拉菜单内容-->
                     <el-dropdown-menu slot="dropdown">
-                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
-                            <el-dropdown-item>项目仓库</el-dropdown-item>
-                        </a>
-                        <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
+<!--                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">-->
+<!--                            <el-dropdown-item>项目仓库</el-dropdown-item>-->
+<!--                        </a>-->
+                        <el-dropdown-item command="changepwd">修改密码</el-dropdown-item>
+                        <el-dropdown-item command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
@@ -80,6 +81,10 @@ export default {
         handleCommand(command) {
             if (command == 'loginout') {
                 localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
+                this.$router.push('/login');  //跳转到login
+            }
+            else if (command == 'changepwd'){
+                // localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
                 this.$router.push('/login');  //跳转到login
             }
         },
