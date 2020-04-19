@@ -2,23 +2,16 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../components/common/Home.vue';
 import HomePage from '../components/page/HomePage';
-// import Icon from "../components/page/Icon";
 import OrderManage from "../components/page/OrderManage";
 import MessageCenter from "../components/page/MessageCenter";
 import AdminManage from "../components/page/AdminManage";
-// import BaseForm from "../components/page/BaseForm";
-// import VueEditor from "../components/page/VueEditor";
-// import Markdown from "../components/page/Markdown";
-// import Upload from "../components/page/Upload";
-// import BaseCharts from "../components/page/BaseCharts";
-// import DragList from "../components/page/DragList";
-// import DragDialog from "../components/page/DragDialog";
-// import I18n from "../components/page/I18n";
 import Permission from "../components/page/Permission";
 import FOT from "../components/page/403";
 import FOF from "../components/page/404";
-// import Donate from "../components/page/Donate";
 import Login from "../components/page/Login";
+import Table from "../components/page/Table";
+import AddAdmin from "../components/page/AddAdmin";
+import ChangePwd from "../components/page/ChangePwd";
 
 Vue.use(Router)
 
@@ -69,7 +62,22 @@ export default new Router({
           path: '/403',
           component: FOT,
           meta: { title: '403' }
-        }
+        },
+        {
+          path:'/table',
+          component:Table,
+          meta:{ title: 'table' }
+        },
+         {
+            path:'/addadmin',
+              component:AddAdmin,
+              meta:{title:'添加管理员'}
+          },
+          {
+              path:'/changepwd',
+              component:ChangePwd,
+              meta:{title:'修改密码'}
+          }
       ]
     },
     {
@@ -81,5 +89,22 @@ export default new Router({
       path: '*',
       redirect: '/404'
     }
+
   ]
 })
+
+//对每次访问之前都要先看是否已经登录
+// router.beforeEach((to,from,next)=>{
+//   if(to.path.startsWith('/login')){
+//     window.sessionStorage.removeItem('access-token');
+//     next();
+//   }else{
+//     let token = window.sessionStorage.getItem('access-token');
+//     if(!token){
+//       //未登录  跳回主页面
+//       next({path:'/login'});
+//     }else{
+//       next();
+//     }
+//   }
+// });

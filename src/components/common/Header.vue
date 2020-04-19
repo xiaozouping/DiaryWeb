@@ -85,7 +85,7 @@ export default {
             }
             else if (command == 'changepwd'){
                 // localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
-                this.$router.push('/login');  //跳转到login
+                this.$router.push('/changepwd');  //跳转到login
             }
         },
         // 侧边栏折叠

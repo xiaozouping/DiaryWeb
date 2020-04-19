@@ -2,6 +2,9 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 
+import axios from 'axios';
+Vue.prototype.$axios = axios;
+
 // import VueI18n from 'vue-i18n';
 
 // v-dialogDrag: 弹窗拖拽属性

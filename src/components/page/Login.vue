@@ -35,9 +35,13 @@
 </template>
 
 <script>
+  // import { requestLogin } from '../../api/index'
 export default {
+    name: 'Login',
     data: function() {
         return {
+            islogin:false,
+            checked:true,
             param: {
                 username: 'admin',
                 password: '123123',
@@ -51,7 +55,28 @@ export default {
     methods: {
         submitForm() {
             this.$refs.login.validate(valid => {
-                if (valid) {
+                if (valid) {    //验证通过 可以提交
+                    this.islogin = true;
+                    //将提交的数据进行封装
+                    var loginParams = {Username : this.param.username,Password:this.param.password};
+
+                    //调用函数  传递参数 获取结果
+                    // requestLogin(loginParams).then(data => {
+                    //     this.islogin = false;
+                    //
+                    //     if(data.code == '200'){
+                    //         sessionStorage.setItem('access-token',data.token);
+                    //         //用vue路由跳转到后台主界面
+                    //         this.$router.push('/');
+                    //     }
+                    //     else{
+                    //         this.$message({
+                    //             message:data.msg,
+                    //             typr:error
+                    //         });
+                    //     }
+                    // })
+
                     this.$message.success('登录成功');
                     localStorage.setItem('ms_username', this.param.username);
                     this.$router.push('/');

@@ -74,6 +74,10 @@ export default {
                         {
                             index: 'ordermanage',
                             title: '订单信息'
+                        },
+                        {
+                            index: 'table',
+                            title: '表格'
                         }
                     ]
                 },
@@ -90,6 +94,10 @@ export default {
                         {
                             index: 'adminmanage',
                             title: '管理员信息'
+                        },
+                        {
+                            index:'addadmin',
+                            title:'添加管理员'
                         }
                     ]
                 }
