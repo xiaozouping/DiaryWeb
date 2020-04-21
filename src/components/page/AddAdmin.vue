@@ -29,32 +29,41 @@
 
                 <el-form-item label="性别：" prop="sex">
                     <el-radio-group v-model="ruleForm.sex">
-                        <el-radio label="男"></el-radio>
-                        <el-radio label="女"></el-radio>
+                        <el-radio label="0">男</el-radio>
+                        <el-radio label="1">女</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
-                <el-form-item label="出生日期：" required >
+                <el-form-item label="出生日期：" required>
                     <el-col :span="6">
                         <el-form-item prop="birthDay">
-                            <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.birthDay" style="width: 100%;" :picker-options="pickerOptions"></el-date-picker>
+                            <el-date-picker
+                                type="date"
+                                placeholder="选择日期"
+                                v-model="ruleForm.birth_day"
+                                style="width: 100%;"
+                                :picker-options="pickerOptions"
+                                value-format="yyyy-MM-dd"
+                            ></el-date-picker>
                         </el-form-item>
                     </el-col>
                 </el-form-item>
 
-                <el-form-item label="等级：" prop="rank">
-                    <el-select v-model="ruleForm.rank" placeholder="请选择管理员等级">
+                <el-form-item label="等级：" prop="admin_rank">
+                    <el-select v-model="ruleForm.admin_rank" placeholder="请选择管理员等级">
                         <el-option label="普通管理员" value="1"></el-option>
                         <el-option label="超级管理员" value="0"></el-option>
                     </el-select>
                 </el-form-item>
 
-                <el-form-item label="状态：" prop="state">
+                <el-form-item label="状态：" prop="admin_state">
                     <el-switch
-                        v-model="ruleForm.state"
+                        v-model="ruleForm.admin_state"
                         active-text="正常"
-                        inactive-text="冻结">
-                    </el-switch>
+                        :active-value="'0'"
+                        inactive-text="冻结"
+                        :inactive-value="'2'"
+                    ></el-switch>
                 </el-form-item>
 
                 <el-form-item style="margin-top: 50px;align-items: center">
@@ -82,6 +91,7 @@
                     birthDay:'',
                     state:true,
                 },
+                //出生日期不得晚于今天
                 pickerOptions: {
                     disabledDate(time) {
                         return time.getTime() > Date.now();
@@ -106,18 +116,32 @@
                         }
                     ],
                     sex: [ { required: true, message: '请选择性别', trigger: 'change' } ],
-                    birthDay: [ { type: 'date', required: true, message: '请选择日期', trigger: 'change' } ],
-                    rank: [{ required: true, message: '请选择管理员等级', trigger: 'change' }]
+                    birth_day: [ { type: 'date', required: true, message: '请选择日期', trigger: 'change' } ],
+                    admin_rank: [{ required: true, message: '请选择管理员等级', trigger: 'change' }]
                 }
             };
         },
         methods: {
             submitForm(formName) {
+                const _this = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        console.log(_this.ruleForm)
+                        // alert('submit!');
+                        _this.$axios.post('http://localhost:8181/admin/save',this.ruleForm).then(function (resp) {
+                            // console.log(resp.data)
+                            if (resp.data == 'success'){
+                                // _this.$alert('为您跳转至管理员信息！', '添加成功', {
+                                //     confirmButtonText: '确定',
+                                //     callback: action => {
+                                //
+                                //     }
+                                // })
+                                _this.$message("添加成功！")
+                                _this.$router.push('/adminmanage')
+                            }
+                        })
                     } else {
-                        console.log('error submit!!');
                         return false;
                     }
                 });
