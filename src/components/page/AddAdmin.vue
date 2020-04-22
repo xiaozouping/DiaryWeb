@@ -126,11 +126,13 @@
                 const _this = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        console.log(_this.ruleForm)
-                        // alert('submit!');
-                        _this.$axios.post('http://localhost:8181/admin/save',this.ruleForm).then(function (resp) {
-                            // console.log(resp.data)
-                            if (resp.data == 'success'){
+                        // console.log(_this.ruleForm)
+
+                        _this.$axios.post('http://localhost:8181/admin/save',_this.ruleForm).then(function (resp) {
+
+                            // alert('submit!');
+                            if (resp.data == '1'){
+                                // alert('submit!');
                                 // _this.$alert('为您跳转至管理员信息！', '添加成功', {
                                 //     confirmButtonText: '确定',
                                 //     callback: action => {

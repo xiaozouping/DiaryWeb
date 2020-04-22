@@ -10,9 +10,9 @@
 
         <div class="container">
             <div class="handle-box">
+                <el-button type="primary" class="handle-del mr10" @click="toAddAdmin">添加</el-button>
                 <el-button
                     type="primary"
-                    icon="el-icon-delete"
                     class="handle-del mr10"
                     @click="delAllSelection"
                 >批量删除</el-button>
@@ -31,7 +31,7 @@
                     <el-option key="2" label="超级管理员" value="超级管理员"></el-option>
                 </el-select>
 
-                <el-button type="primary" icon="el-icon-search" @click="handleSearch">查询</el-button>
+                <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
 
             <!-- 表头单元格的 className 的回调方法，也可以使用字符串为所有表头单元格设置一个固定的 className。-->
@@ -54,7 +54,7 @@
 
                 <el-table-column prop="realname" label="真实姓名" align="center"></el-table-column>
 
-                <el-table-column label="性别" width="70" align="center" >
+                <el-table-column label="性别" width="55px" align="center" >
                     <template slot-scope="scope">
                         {{scope.row.sex==0?'男':'女'}}
                     </template>
@@ -64,10 +64,10 @@
 
                 <el-table-column prop="phone" label="电话" align="center"></el-table-column>
 
-                <el-table-column prop="create_time" label="创建时间" :formatter="formatDate"></el-table-column>
+                <el-table-column prop="create_time" label="创建时间" width="150px":formatter="formatDate"></el-table-column>
 
 
-                <el-table-column label="状态" align="center">
+                <el-table-column label="状态" align="center"width="90px">
                     <template slot-scope="scope">
 <!--                        标签样式-->
                         <el-tag
@@ -76,13 +76,13 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column label="等级" align="center">
+                <el-table-column label="等级" align="center" width="110px">
                     <template slot-scope="scope">
                         {{scope.row.admin_rank==0?'超级管理员':'普通管理员'}}
                     </template>
                 </el-table-column>
 
-                <el-table-column label="操作" width="180" align="center" fixed="right" >
+                <el-table-column label="操作" width="150px" align="center" fixed="right" >
                     <template slot-scope="scope">
                         <el-button
                             type="text"
@@ -295,15 +295,19 @@ export default {
     created() {
         // window.location.reload()
         const _this = this
-        _this.$axios.get('http://localhost:8181/admin/findAll/0/4').then(function (resp) {
+        _this.$axios.get('http://localhost:8181/admin/getadmin').then(function (resp) {
             // console.log(resp)
-            _this.tableData = resp.data.content
-            _this.pageSize = resp.data.size
-            _this.pageTotal = resp.data.totalElements
+            _this.tableData = resp.data
+
+            // _this.pageSize = resp.data.size
+            // _this.pageTotal = resp.data.totalElements
         })
     },
     methods: {
 
+        toAddAdmin(){
+            this.$router.push('/addadmin')
+        },
         //失效帐号不可选
         selectTrue(row, column){
             if(row.admin_state == "1"){
@@ -328,6 +332,7 @@ export default {
             var time = new Date(row.create_time);
             return time.getFullYear()+"-"+(time.getMonth()+1)+"-"+time.getDate()+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
         },
+
         // 删除操作
         handleDelete(row) {
             // 二次确认删除
@@ -348,6 +353,7 @@ export default {
                 })
                 .catch(() => {});
         },
+
         // 多选操作
         handleSelectionChange(val) {
             this.multipleSelection = val;
@@ -363,23 +369,25 @@ export default {
             this.multipleSelection = [];
         },
 
-        // 点击修改，跳出弹窗
+        // 点击修改，跳出弹窗,显示数据
         handleEdit(row) {
             const _this = this
             _this.$axios.get('http://localhost:8181/admin/findById/'+row.id).then(function(resp){
-                // console.log(resp)
-                _this.form = resp.data
+                // console.log(resp.data)
+                _this.form = resp.data[0]
             })
             this.editVisible = true;
         },
         // 保存修改，更新数据到数据库
         saveEdit(formName) {
             this.editVisible = false;
+
             const _this = this
             this.$refs[formName].validate((valid) => {
                 if (valid){
-                    _this.$axios.put('http://localhost:8181/admin/update',this.form).then(function(resp){
-                        if(resp.data == 'success'){
+                    console.log(_this.form)
+                    _this.$axios.put('http://localhost:8181/admin/updateById/'+_this.form.id,_this.form).then(function(resp){
+                        if(resp.data == '1'){
                             _this.$message("修改成功！")
                             window.location.reload()
                         }
@@ -421,7 +429,7 @@ export default {
 }
 
 .handle-input {
-    width: 300px;
+    width: 200px;
     display: inline-block;
 }
 .table {
