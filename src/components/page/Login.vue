@@ -2,21 +2,16 @@
     <div class="login-wrap">
         <div class="ms-login">
             <div class="ms-title">后台管理系统</div>
-            <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content">
 
                 <el-form-item prop="username">
-                    <el-input v-model="param.username" placeholder="用户名" clearable>
+                    <el-input v-model="ruleForm.username" placeholder="用户名" clearable>
                         <el-button slot="prepend" icon="el-icon-lx-people"></el-button>
                     </el-input>
                 </el-form-item>
 
                 <el-form-item prop="password">
-                    <el-input
-                        type="password"
-                        placeholder="密码"
-                        v-model="param.password" show-password clearable
-                        @keyup.enter.native="submitForm()"
-                    >
+                    <el-input type="password" placeholder="密码" v-model="ruleForm.password" show-password clearable @keyup.enter.native="submitForm()" >
                         <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                     </el-input>
 
@@ -42,9 +37,9 @@ export default {
         return {
             islogin:false,
             checked:true,
-            param: {
-                username: 'admin',
-                password: '123123',
+            ruleForm: {
+                username: '',
+                password: '',
             },
             rules: {
                 username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -53,32 +48,18 @@ export default {
         };
     },
     methods: {
-        submitForm() {
-            this.$refs.login.validate(valid => {
+        submitForm(formName) {
+            this.$refs[formName].validate(valid => {
                 if (valid) {    //验证通过 可以提交
-                    this.islogin = true;
+                    const _this = this;
+                    // this.islogin = true;
                     //将提交的数据进行封装
-                    var loginParams = {Username : this.param.username,Password:this.param.password};
+                    // var loginParams = {Username : this.form.username,Password:this.form.password};
 
-                    //调用函数  传递参数 获取结果
-                    // requestLogin(loginParams).then(data => {
-                    //     this.islogin = false;
-                    //
-                    //     if(data.code == '200'){
-                    //         sessionStorage.setItem('access-token',data.token);
-                    //         //用vue路由跳转到后台主界面
-                    //         this.$router.push('/');
-                    //     }
-                    //     else{
-                    //         this.$message({
-                    //             message:data.msg,
-                    //             typr:error
-                    //         });
-                    //     }
-                    // })
+                    _this.$axios.post('http://localhost:8181/admin/save')
 
                     this.$message.success('登录成功');
-                    localStorage.setItem('ms_username', this.param.username);
+                    localStorage.setItem('ms_username', this.form.username);
                     this.$router.push('/');
                 } else {
                     this.$message.error('请输入账号和密码');
@@ -134,7 +115,7 @@ export default {
     font-size: 12px;
     position: absolute;
     right: 0;
-    top: 35px;
+    top: 45px;
     height: 17px;
     line-height: 17px;
     text-decoration: underline;

@@ -8,7 +8,7 @@
             </el-breadcrumb>
         </div>
 
-        <div class="container">
+        <div class="container" >
             <div class="handle-box">
                 <el-button type="primary" class="handle-del mr10" @click="toAddAdmin">添加</el-button>
                 <el-button
@@ -64,7 +64,7 @@
 
                 <el-table-column prop="phone" label="电话" align="center"></el-table-column>
 
-                <el-table-column prop="create_time" label="创建时间" width="150px":formatter="formatDate"></el-table-column>
+                <el-table-column prop="create_time" label="创建时间" width="160px" align="center"></el-table-column>
 
 
                 <el-table-column label="状态" align="center"width="90px">
@@ -128,7 +128,7 @@
                 </el-form-item>
 
                 <el-form-item label="密码：" class="input-style">
-                    <el-input v-model="form.password" type="password" show-password clearable></el-input>
+                    <el-input v-model="form.password" type="password" clearable></el-input>
                 </el-form-item>
 
                 <el-form-item label="真实姓名：" class="input-style">
@@ -188,30 +188,6 @@ export default {
     name: 'AdminManage',
     data() {
         return {
-            rules: {
-                name: [
-                    { required: true, message: '请输入活动名称', trigger: 'blur' },
-                    { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-                ],
-                region: [
-                    { required: true, message: '请选择活动区域', trigger: 'change' }
-                ],
-                date1: [
-                    { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
-                ],
-                date2: [
-                    { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
-                ],
-                type: [
-                    { type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change' }
-                ],
-                resource: [
-                    { required: true, message: '请选择活动资源', trigger: 'change' }
-                ],
-                desc: [
-                    { required: true, message: '请填写活动形式', trigger: 'blur' }
-                ]
-            },
             tableData: [
                 {
                     id:1,
@@ -281,6 +257,26 @@ export default {
                 }
 
             ],
+            loading: true,
+
+            rules: {
+                password: [
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { pattern: /^(\w){8,20}$/, message: '只能输入8-20个字母、数字、下划线' , trigger: 'blur'}
+                ],
+                phone: [
+                    { required: true, message: '请输入电话', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            if(/^1[34578]\d{9}$/.test(value) == false){
+                                callback(new Error("请输入正确的手机号"));
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'
+                    }
+                ],
+            },
+
             multipleSelection: [],
             delList: [],
             editVisible: false,
@@ -289,7 +285,8 @@ export default {
             pageTotal: '',
             form: {},
             idx: -1,  //选中信息的id
-            id: -1
+            id: -1,
+
         };
     },
     created() {
@@ -298,10 +295,9 @@ export default {
         _this.$axios.get('http://localhost:8181/admin/getadmin').then(function (resp) {
             // console.log(resp)
             _this.tableData = resp.data
-
-            // _this.pageSize = resp.data.size
-            // _this.pageTotal = resp.data.totalElements
+            _this.loading = false
         })
+
     },
     methods: {
 
@@ -323,35 +319,25 @@ export default {
             // this.getData();
         },
 
-        //创建时间显示格式
-        formatDate(row, column) {
-            // 获取单元格数据
-            if (row.create_time==''){
-                return ''
-            }
-            var time = new Date(row.create_time);
-            return time.getFullYear()+"-"+(time.getMonth()+1)+"-"+time.getDate()+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
-        },
-
         // 删除操作
         handleDelete(row) {
             // 二次确认删除
             this.$confirm('确定要删除"'+row.username+'"吗？', '提示', {
                 type: 'warning'
             })
-                .then(() => {
-                    const _this = this
-                    _this.$axios.put('http://localhost:8181/admin/deleteById/'+row.id).then(function(resp){
-                        console.log(resp)
-                        _this.$alert('已删除成功！', '消息', {
-                            confirmButtonText: '确定',
-                            callback: action => {
-                                window.location.reload()
-                            }
-                        })
+            .then(() => {
+                const _this = this
+                _this.$axios.put('http://localhost:8181/admin/deleteById/'+row.id).then(function(resp){
+                    console.log(resp)
+                    _this.$alert('已删除成功！', '消息', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            window.location.reload()
+                        }
                     })
                 })
-                .catch(() => {});
+            })
+            .catch(() => {});
         },
 
         // 多选操作
@@ -400,8 +386,6 @@ export default {
                     return false;
                 }
             });
-            // this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-            // this.$set(this.tableData, this.idx, this.form);
         },
 
         // 分页导航

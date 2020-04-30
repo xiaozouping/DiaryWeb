@@ -16,81 +16,81 @@ import ChangePwd from "../components/page/ChangePwd";
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      redirect: '/homepage'
-    },
-    {
-      path:'/',
-      component:Home,
-      meta: { title: '公共组件' },
-      children:[
+    mode: 'history',
+    routes: [
         {
-          path: '/homepage',
-          component: HomePage,
-          meta: { title: '首页' }
+          path: '/',
+          redirect: '/login'
         },
         {
-          path: '/ordermanage',
-          component: OrderManage,
-          meta: { title: '订单管理' }
+            path:'/',
+            component:Home,
+            meta: { title: '公共组件' },
+            children:[
+                {
+                    path: '/homepage',
+                    component: HomePage,
+                    meta: { title: '首页' }
+                },
+                {
+                    path: '/ordermanage',
+                    component: OrderManage,
+                    meta: { title: '订单管理' }
+                },
+                {
+                    path: '/adminmanage',
+                    component: AdminManage,
+                    meta: { title: '管理员管理' , permission: true}
+                    //只有超级管理员才能管理管理员
+                },
+                {
+                    path: '/messagecenter',
+                    component: MessageCenter,
+                    meta: { title: '消息中心' }
+                },
+                {
+                    // 权限页面
+                    path: '/permission',
+                    component: Permission,
+                    meta: { title: '权限测试', permission: true }
+                },
+                {
+                    path: '/404',
+                    component: FOF,
+                    meta: { title: '404' }
+                },
+                {
+                    path: '/403',
+                    component: FOT,
+                    meta: { title: '403' }
+                },
+                {
+                    path:'/table',
+                    component:Table,
+                    meta:{ title: 'table' }
+                },
+                {
+                    path:'/addadmin',
+                    component:AddAdmin,
+                    meta:{title:'添加管理员'}
+                },
+                {
+                    path:'/changepwd',
+                    component:ChangePwd,
+                    meta:{title:'修改密码'}
+                }
+            ]
         },
         {
-          path: '/adminmanage',
-          component: AdminManage,
-          meta: { title: '管理员管理' , permission: true}
-          //只有超级管理员才能管理管理员
+            path: '/login',
+            component: Login,
+            meta: { title: '登录' }
         },
         {
-          path: '/messagecenter',
-          component: MessageCenter,
-          meta: { title: '消息中心' }
-        },
-        {
-          // 权限页面
-          path: '/permission',
-          component: Permission,
-          meta: { title: '权限测试', permission: true }
-        },
-        {
-          path: '/404',
-          component: FOF,
-          meta: { title: '404' }
-        },
-        {
-          path: '/403',
-          component: FOT,
-          meta: { title: '403' }
-        },
-        {
-          path:'/table',
-          component:Table,
-          meta:{ title: 'table' }
-        },
-         {
-            path:'/addadmin',
-              component:AddAdmin,
-              meta:{title:'添加管理员'}
-          },
-          {
-              path:'/changepwd',
-              component:ChangePwd,
-              meta:{title:'修改密码'}
-          }
-      ]
-    },
-    {
-      path: '/login',
-      component: Login,
-      meta: { title: '登录' }
-    },
-    {
-      path: '*',
-      redirect: '/404'
-    }
-
-  ]
+            path: '*',
+            redirect: '/404'
+        }
+    ]
 })
 
 //对每次访问之前都要先看是否已经登录
