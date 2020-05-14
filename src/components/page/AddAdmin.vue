@@ -3,16 +3,16 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i> 添加管理员
+                    <i class="el-icon-circle-plus"></i> 新建管理员
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
 
         <div class="container">
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
 
                 <el-form-item label="用户名：" prop="username" class="input-style">
-                    <el-input  v-model="ruleForm.username" size="middle" clearable></el-input>
+                    <el-input  v-model="ruleForm.username" size="middle" placeholder="创建后不可修改" clearable></el-input>
                 </el-form-item>
 
                 <el-form-item label="密码：" prop="password" class="input-style">
@@ -24,7 +24,7 @@
                 </el-form-item>
 
                 <el-form-item label="电话：" prop="phone" class="input-style">
-                    <el-input  v-model="ruleForm.phone" size="middle" clearable></el-input>
+                    <el-input  v-model="ruleForm.phone" size="middle" maxlength="11" clearable></el-input>
                 </el-form-item>
 
                 <el-form-item label="性别：" prop="sex">
@@ -36,7 +36,7 @@
 
                 <el-form-item label="出生日期：" required>
                     <el-col :span="6">
-                        <el-form-item prop="birthDay">
+                        <el-form-item prop="birth_day">
                             <el-date-picker
                                 type="date"
                                 placeholder="选择日期"
@@ -67,8 +67,8 @@
                 </el-form-item>
 
                 <el-form-item style="margin-top: 50px;align-items: center">
-                    <el-button type="primary" @click="submitForm('ruleForm')">添加</el-button>
-                    <el-button @click="resetForm('ruleForm')">重置</el-button>
+                    <el-button type="primary" @click="submitForm('ruleForm')">新 建</el-button>
+                    <el-button @click="resetForm('ruleForm')">重 置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -88,7 +88,7 @@
                     realname:'',
                     phone:'',
                     sex:'',
-                    birthDay:'',
+                    birth_day:'',
                     state:true,
                 },
                 //出生日期不得晚于今天
@@ -116,10 +116,15 @@
                         }
                     ],
                     sex: [ { required: true, message: '请选择性别', trigger: 'change' } ],
-                    birth_day: [ { type: 'date', required: true, message: '请选择日期', trigger: 'change' } ],
+                    birth_day: [ { type: 'string', required: true, message: '请选择日期', trigger: 'change' } ],
                     admin_rank: [{ required: true, message: '请选择管理员等级', trigger: 'change' }]
                 }
             };
+        },
+        watch:{
+            $route(){
+                window.location.reload();
+            }
         },
         methods: {
             submitForm(formName) {
@@ -139,8 +144,11 @@
                                 //
                                 //     }
                                 // })
-                                _this.$message("添加成功！")
-                                _this.$router.push('/adminmanage')
+                                _this.$message({message:"添加成功！",type:"success"});
+                                _this.$router.push('/adminmanage');
+                            }
+                            else {
+                                _this.$message({message:"该用户名已存在",type:"error"})
                             }
                         })
                     } else {
@@ -156,6 +164,9 @@
 </script>
 
 <style scoped>
+    .ruleForm{
+        margin-left: 50px;
+    }
     .input-style{
         width: 450px;
         display: inline-block;

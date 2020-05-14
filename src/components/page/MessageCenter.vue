@@ -77,17 +77,22 @@
             return {
                 message: 'first',
                 showHeader: false,
-                unread: [{
-                    date: '2018-04-19 20:00:00',
-                    title: '【系统通知】该系统将于今晚凌晨2点到5点进行升级维护',
-                },{
-                    date: '2018-04-19 21:00:00',
-                    title: '今晚12点整发大红包，先到先得',
-                }],
-                read: [{
-                    date: '2018-04-19 20:00:00',
-                    title: '【系统通知】该系统将于今晚凌晨2点到5点进行升级维护'
-                }],
+                unread: [
+                    {
+                        date: '2018-04-19 20:00:00',
+                        title: '【系统通知】该系统将于今晚凌晨2点到5点进行升级维护',
+                    },
+                    {
+                        date: '2018-04-19 21:00:00',
+                        title: '今晚12点整发大红包，先到先得',
+                    }
+                ],
+                read: [
+                    {
+                        date: '2018-04-19 20:00:00',
+                        title: '【系统通知】该系统将于今晚凌晨2点到5点进行升级维护'
+                    }
+                ],
                 recycle: [{
                     date: '2018-04-19 20:00:00',
                     title: '【系统通知】该系统将于今晚凌晨2点到5点进行升级维护'
@@ -119,11 +124,11 @@
 </script>
 
 <style>
-.message-title{
-    cursor: pointer;
-}
-.handle-row{
-    margin-top: 30px;
-}
+    .message-title{
+        cursor: pointer;
+    }
+    .handle-row{
+        margin-top: 30px;
+    }
 </style>
 

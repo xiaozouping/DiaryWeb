@@ -23,16 +23,16 @@
 </script>
 
 <style scoped>
-h1{
-    text-align: center;
-    margin: 30px 0;
-}
-p{
-    line-height: 30px;
-    margin-bottom: 10px;
-    text-indent: 2em;
-}
-.logout{
-    color: #409EFF;
-}
+    h1{
+        text-align: center;
+        margin: 30px 0;
+    }
+    p{
+        line-height: 30px;
+        margin-bottom: 10px;
+        text-indent: 2em;
+    }
+    .logout{
+        color: #409EFF;
+    }
 </style>

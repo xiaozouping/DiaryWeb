@@ -9,18 +9,17 @@ import Permission from "../components/page/Permission";
 import FOT from "../components/page/403";
 import FOF from "../components/page/404";
 import Login from "../components/page/Login";
-import Table from "../components/page/Table";
 import AddAdmin from "../components/page/AddAdmin";
 import ChangePwd from "../components/page/ChangePwd";
+import PersonCenter from "../components/page/PersonCenter";
 
 Vue.use(Router)
 
 export default new Router({
-    mode: 'history',
     routes: [
         {
-          path: '/',
-          redirect: '/login'
+            path: '/',
+            redirect: '/homepage'
         },
         {
             path:'/',
@@ -35,12 +34,12 @@ export default new Router({
                 {
                     path: '/ordermanage',
                     component: OrderManage,
-                    meta: { title: '订单管理' }
+                    meta: { title: '订单信息' }
                 },
                 {
                     path: '/adminmanage',
                     component: AdminManage,
-                    meta: { title: '管理员管理' , permission: true}
+                    meta: { title: '管理员信息' , permission: true}
                     //只有超级管理员才能管理管理员
                 },
                 {
@@ -65,19 +64,19 @@ export default new Router({
                     meta: { title: '403' }
                 },
                 {
-                    path:'/table',
-                    component:Table,
-                    meta:{ title: 'table' }
-                },
-                {
                     path:'/addadmin',
                     component:AddAdmin,
-                    meta:{title:'添加管理员'}
+                    meta:{title:'新建管理员', permission: true}
                 },
                 {
                     path:'/changepwd',
                     component:ChangePwd,
                     meta:{title:'修改密码'}
+                },
+                {
+                    path:'/personcenter',
+                    component:PersonCenter,
+                    meta:{title:'个人信息'}
                 }
             ]
         },
@@ -92,19 +91,3 @@ export default new Router({
         }
     ]
 })
-
-//对每次访问之前都要先看是否已经登录
-// router.beforeEach((to,from,next)=>{
-//   if(to.path.startsWith('/login')){
-//     window.sessionStorage.removeItem('access-token');
-//     next();
-//   }else{
-//     let token = window.sessionStorage.getItem('access-token');
-//     if(!token){
-//       //未登录  跳回主页面
-//       next({path:'/login'});
-//     }else{
-//       next();
-//     }
-//   }
-// });

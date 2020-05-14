@@ -3,29 +3,26 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i> 订单管理
+                    <i class="el-icon-document"></i> 订单信息
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
 
         <div class="container">
             <div class="handle-box">
-                <el-button
-                    type="primary"
-                    class="handle-del mr10"
-                    @click="delAllSelection"
-                >批量发货</el-button>
+                <el-button type="primary" class="handle-del mr10" @click="deliveryAllOrder" :disabled="multipleSelection.length === 0">批量发货</el-button>
+                <el-button type="primary" class="handle-del mr10" @click="cancelSelection">取消选择</el-button>
 
-                <el-select v-model="state" placeholder="订单状态" class="handle-select mr10">
+                <el-select v-model="orderStatus" placeholder="订单状态" class="handle-select mr10" clearable>
                     <el-option key="1" label="待发货" value="0"></el-option>
                     <el-option key="2" label="已发货" value="1"></el-option>
-                    <el-option key="3" label="已收货" value="2"></el-option>
-                    <el-option key="3" label="已取消" value="3"></el-option>
-                    <el-option key="3" label="待付款" value="4"></el-option>
+                    <el-option key="3" label="已完成" value="2"></el-option>
+                    <el-option key="4" label="已取消" value="3"></el-option>
+                    <el-option key="5" label="待付款" value="4"></el-option>
                 </el-select>
 
-                <el-input v-model="orderNo" placeholder="订单编号" class="handle-input mr10"></el-input>
-                <el-input v-model="userPhone" placeholder="电话" class="handle-input mr10"></el-input>
+                <el-input v-model="orderNo" placeholder="订单编号" class="handle-input mr10" clearable></el-input>
+                <el-input v-model="userPhone" placeholder="电话" class="handle-input mr10" clearable></el-input>
 
                 <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
@@ -34,7 +31,7 @@
             <el-table
                 :data="tableData"
                 border
-                height="400px"
+                height="430px"
                 class="table"
                 ref="multipleTable"
                 v-loading="loading"
@@ -46,145 +43,190 @@
                 <!--              ID-->
                 <el-table-column prop="orderId" label="ID" width="55" align="center"></el-table-column>
 
-                <el-table-column prop="orderNo" label="订单编号" align="center"></el-table-column>
-
-                <el-table-column prop="goodsName" label="作品名称" align="center"></el-table-column>
-
-                <el-table-column prop="orderStatus" label="订单状态" align="center">
+                <el-table-column prop="orderNo" label="订单编号" align="center" width="130px">
                     <template slot-scope="scope">
-                        {{scope.row.orderStatus==0?'待发货':(scope.row.orderStatus==1?'待收货':(scope.row.orderStatus==2?'已完成':(scope.row.orderStatus==3?'已取消':'待付款')))}}
+                        <div style="color:#409eff;text-decoration:underline;cursor:pointer;" @click="handleDetail(scope.row)">{{ scope.row.orderNo }}</div>
                     </template>
                 </el-table-column>
 
-                <el-table-column prop="totalPrice" label="金额" align="center"></el-table-column>
+                <!--                <el-table-column prop="orderNo" label="订单编号" align="center"></el-table-column>-->
 
-                <el-table-column prop="userName" label="收件人" align="center"></el-table-column>
+                <el-table-column prop="works_title" label="作品名称" align="center"width="200px">
+                    <template slot-scope="scope">
+                        《 {{scope.row.works_title}} 》
+                    </template>
+                </el-table-column>
 
-                <el-table-column prop="userPhone" label="电话" align="center"></el-table-column>
+                <el-table-column prop="orderStatus" label="订单状态" align="center" width="100px">
+                    <template slot-scope="scope">
+                        <el-tag
+                            :type="scope.row.orderStatus==0?'danger':(scope.row.orderStatus==1?'':(scope.row.orderStatus==2?'success':(scope.row.orderStatus==3?'info':'warning')))"
+                        >{{scope.row.orderStatus==0?'待发货':(scope.row.orderStatus==1?'已发货':(scope.row.orderStatus==2?'已完成':(scope.row.orderStatus==3?'已取消':'待付款')))}}</el-tag>
 
-                <el-table-column prop="createTime" label="下单时间" align="center" :formatter="formatDate" width="150px"></el-table-column>
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="totalPrice" label="总金额" align="center" width="70px">
+                    <template slot-scope="scope">
+                        ￥ {{scope.row.totalPrice}}
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="userName" label="收件人" align="center" width="120px"></el-table-column>
+
+                <el-table-column prop="userPhone" label="电话" align="center" width="120px"></el-table-column>
+
+                <el-table-column prop="deliveryName" label="快递名称" align="center" width="120px">
+                    <template slot-scope="scope">
+                        {{scope.row.deliveryName==0?'圆通快递':'顺丰快递'}}
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="createTime" label="创建时间" align="center" width="160px"></el-table-column>
 
 
                 <el-table-column label="操作" width="250px" align="center" fixed="right" >
                     <template slot-scope="scope">
                         <el-button
                             type="danger"
-                            @click="handleEdit(scope.row)"
-                            :disabled="scope.row.admin_state == '1'"
+                            @click="handleDelivery(scope.row)"
+                            :disabled="scope.row.orderStatus != '0'"
                             size="small"
                         >发货</el-button>
                         <el-button
                             type="success"
-                            @click="handleDelete(scope.row)"
-                            :disabled="scope.row.admin_state == '1'"
+                            @click="handleDownload(scope.row)"
+                            :disabled="scope.row.orderStatus == '3' || scope.row.orderStatus == '4'"
                             size="small"
                         >下载</el-button>
                         <el-button
                             type="info"
-                            @click="handleEdit(scope.row)"
-                            :disabled="scope.row.admin_state == '1'"
+                            @click="handleCancel(scope.row)"
+                            :disabled="!(scope.row.orderStatus == '0'|| scope.row.orderStatus == '4')"
                             size="small"
                         >取消订单</el-button>
                     </template>
                 </el-table-column>
             </el-table>
 
-            <!--            分页-->
-            <div class="pagination">
-                <!--                @current-change点击绑定按钮-->
-
-                <el-pagination
-                    background
-                    layout="total, prev, pager, next"
-                    :current-page="pageIndex"
-                    :page-size="pageSize"
-                    :total="pageTotal"
-                    @current-change="handlePageChange"
-                ></el-pagination>
-            </div>
+            <!--            <div class="pagination">-->
+            <!--                &lt;!&ndash;@current-change点击绑定按钮&ndash;&gt;-->
+            <!--                <el-pagination-->
+            <!--                    background-->
+            <!--                    layout="total, prev, pager, next"-->
+            <!--                    :current-page="pagination.page"-->
+            <!--                    :page-size="pagination.size"-->
+            <!--                    :total="pagination.total"-->
+            <!--                    @current-change="handlePageChange"-->
+            <!--                ></el-pagination>-->
+            <!--            </div>-->
         </div>
+
+        <!-- 订单详情弹出框 -->
+        <el-dialog title="订单详情" :visible.sync="editVisible" width="60%">
+
+            <el-form ref="form" :model="form"  label-width="100px" >
+
+                <el-form-item label="订单ID：" class="input-style">
+                    {{form.orderId}}
+                </el-form-item>
+
+                <el-form-item label="订单编号：" class="input-style" style="font-weight: bold;">
+                    {{form.orderNo}}
+                </el-form-item>
+
+                <el-form-item label="交易状态：" class="input-style1" style="color:#1aad19;font-weight: bold;">
+                    {{form.orderStatus==0?'待发货':(form.orderStatus==1?'已发货':(form.orderStatus==2?'已完成':(form.orderStatus==3?'已取消':'待付款')))}}
+                </el-form-item>
+
+                <el-form-item label="作品名称：" class="input-style">
+                    《 {{form.works_title}} 》
+                </el-form-item>
+
+                <el-form-item label="订购数量：" class="input-style">
+                    {{form.goodsNum}}
+                </el-form-item>
+
+                <el-form-item label="作品页数：" class="input-style1">
+                    {{form.worksPage}} 页
+                </el-form-item>
+
+                <el-form-item label="快递名称：" class="input-style">
+                    {{form.deliveryName==0?'圆通快递':'顺丰快递'}}
+                </el-form-item>
+
+                <el-form-item label="快递金额：" class="input-style">
+                    ￥ {{form.deliveryPrice}}
+                </el-form-item>
+
+                <el-form-item label="作品价格：" class="input-style">
+                    ￥ {{form.worksPrice}}
+                </el-form-item>
+
+                <el-form-item label="合计：" class="input-style" style="color:#f0a732;font-weight: bold;">
+                    ￥ {{form.totalPrice}}
+                </el-form-item>
+
+                <el-form-item label="收件人ID：" class="input-style">
+                    {{form.userId}}
+                </el-form-item>
+
+                <el-form-item label="收件人：" class="input-style">
+                    {{form.userName}}
+                </el-form-item>
+
+                <el-form-item label="收件电话：" class="input-style">
+                    {{form.userPhone}}
+                </el-form-item>
+
+                <el-form-item label="收货地址：" class="input-style">
+                    {{form.userAddress}}
+                </el-form-item>
+
+                <el-form-item label="创建时间：" class="input-style">
+                    {{form.createTime}}
+                </el-form-item>
+
+                <el-form-item label="发货时间：" class="input-style">
+                    {{form.deliveryTime}}
+                </el-form-item>
+
+                <el-form-item label="收货时间：" class="input-style">
+                    {{form.receiveTime}}
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="editVisible = false">关 闭</el-button>
+            </span>
+
+        </el-dialog>
 
     </div>
 </template>
 
 <script>
-    import { fetchData } from '../../api/index';
     export default {
         name: 'OrderManage',
         data() {
             return {
-                tableData: [
-                    {
-                        id:1,
-                        username:'zhangsan',
-                        realname: '张三',
-                        sex:'男',
-                        birthDay:'1997-12-21',
-                        phone:123456789,
-                        createTime:20200004,
-                        state: '正常',
-                        rank:'超级管理员'
-                    },
-                    {
-                        id:2,
-                        username:'lisi',
-                        realname: '李四',
-                        sex:'女',
-                        birthDay:'1997-12-21',
-                        phone:125463256,
-                        createTime:20200004,
-                        state: '失效',
-                        rank:'普通管理员'
-                    },
-                    {
-                        id:3,
-                        username:'wangwu',
-                        realname: '王五',
-                        sex:'男',
-                        birthDay:'1997-12-21',
-                        phone:185454125,
-                        createTime:20200004,
-                        state: '冻结',
-                        rank:'普通管理员'
-                    },
-                    {
-                        id:4,
-                        username:'qianliu',
-                        realname: '钱六',
-                        sex:'男',
-                        birthDay:'1997-12-21',
-                        phone:18545654125,
-                        createTime:20200004,
-                        state: '正常',
-                        rank:'超级管理员'
-                    },
-                    {
-                        id:5,
-                        username:'lisi11',
-                        realname: '李四sdsds',
-                        sex:'女',
-                        birthDay:'1997-12-21',
-                        phone:125463256,
-                        createTime:20200004,
-                        state: '失效',
-                        rank:'普通管理员'
-                    },
-                    {
-                        id:6,
-                        username:'zoup',
-                        realname: '邹萍',
-                        sex:'女',
-                        birthDay:'1997-12-26',
-                        phone:125463256,
-                        createTime:20200004,
-                        state: '正常',
-                        rank:'超级管理员'
-                    }
-
-                ],
+                loading: true,
+                tableData: [],
                 multipleSelection: [],
-                delList: [],
                 editVisible: false,
+
+                //查询条件
+                orderStatus:null,
+                orderNo:null,
+                userPhone:null,
+
+                //初始分页条件
+                pagination: {
+                    page: 1,
+                    size: 10,
+                    total: 0,
+                },
+
                 pageIndex: 1,   //页面起始位置
                 pageSize: '',
                 pageTotal: '',
@@ -194,11 +236,11 @@
             };
         },
         created() {
-            // window.location.reload()
             const _this = this
-            _this.$axios.get('http://localhost:8181/ordermessage/getorder').then(function (resp) {
-                // console.log(resp)
+            _this.$axios.get('http://localhost:8181/orders/getorder').then(function (resp) {
+                // console.log(resp.data)
                 _this.tableData = resp.data
+                _this.loading = false
 
                 // _this.pageSize = resp.data.size
                 // _this.pageTotal = resp.data.totalElements
@@ -206,50 +248,93 @@
         },
         methods: {
 
-            toAddAdmin(){
-                this.$router.push('/addadmin')
-            },
             //失效帐号不可选
             selectTrue(row, column){
-                if(row.admin_state == "1"){
-                    return false  //不可勾选
+                if(row.orderStatus == "0"){
+                    return true  //不可勾选
                 }else{
-                    return true  //可勾选
+                    return false  //可勾选
                 }
             },
 
             // 触发搜索按钮
             handleSearch() {
-                // this.$set(this.query, 'pageIndex', 1);
-                // this.getData();
-            },
-
-            //创建时间显示格式
-            formatDate(row, column) {
-                // 获取单元格数据
-                if (row.createTime==''){
-                    return ''
+                // console.log(this.orderStatus);
+                // console.log(this.orderNo);
+                // console.log(this.userPhone);
+                const _this = this;
+                if(!_this.orderStatus){
+                    _this.admin_state=null;
                 }
-                var time = new Date(row.createTime);
-                return time.getFullYear()+"-"+(time.getMonth()+1)+"-"+time.getDate()+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+                _this.$axios.get("http://localhost:8181/orders/searchorder",{
+                    params: {
+                        orderStatus: _this.orderStatus,
+                        orderNo:_this.orderNo,
+                        userPhone:_this.userPhone
+                    }
+                }).then(function (result) {
+                    console.log(result.data)
+                    _this.tableData = result.data
+
+                }).catch(function (error) {
+                    console.log(error)
+                })
             },
 
-            // 删除操作
-            handleDelete(row) {
-                // 二次确认删除
-                this.$confirm('确定要删除"'+row.username+'"吗？', '提示', {
+            // 发货操作
+            handleDelivery(row) {
+                console.log(row)
+                // 二次确认发货
+                this.$confirm('确定要发货吗？', '提示', {
                     type: 'warning'
                 })
                     .then(() => {
                         const _this = this
-                        _this.$axios.put('http://localhost:8181/admin/deleteById/'+row.id).then(function(resp){
+                        _this.$axios.put('http://localhost:8181/orders/deliveryorder/'+row.orderId).then(function(resp){
                             console.log(resp)
-                            _this.$alert('已删除成功！', '消息', {
-                                confirmButtonText: '确定',
-                                callback: action => {
-                                    window.location.reload()
-                                }
-                            })
+                            if (resp.data==1){
+                                _this.$alert('发货成功！', '消息', {
+                                    confirmButtonText: '确定',
+                                    callback: action => {
+                                        window.location.reload()
+                                    }
+                                })
+                            }
+                            else {
+                                _this.$message({message:"发货失败！",type:"error"})
+                            }
+                        })
+                    })
+                    .catch(() => {});
+            },
+
+            //下载作品
+            handleDownload(row){
+                // console.log(row);
+
+                window.open("http://localhost:8181/chapter/exportExcel/"+row.userId+"/"+row.works_title,"_parent");
+
+            },
+
+            // 取消操作
+            handleCancel(row) {
+                console.log(row)
+                // 二次确认取消订单
+                this.$confirm('确定要取消订单吗？', '提示', {
+                    type: 'warning'
+                })
+                    .then(() => {
+                        const _this = this
+                        _this.$axios.put('http://localhost:8181/orders/cancelorder/'+row.orderId).then(function(resp){
+                            console.log(resp)
+                            if (resp.data==1){
+                                _this.$message({message:"取消成功！",type:"success"})
+                                window.location.reload()
+
+                            }
+                            else {
+                                _this.$message({message:"发货失败！",type:"error"})
+                            }
                         })
                     })
                     .catch(() => {});
@@ -259,51 +344,66 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            delAllSelection() {
+            //批量发货
+            deliveryAllOrder() {
+
+                const _this = this;
                 const length = this.multipleSelection.length;
-                let str = '';
-                this.delList = this.delList.concat(this.multipleSelection);
-                for (let i = 0; i < length; i++) {
-                    str += this.multipleSelection[i].name + ' ';
-                }
-                this.$message.error(`删除了${str}`);
-                this.multipleSelection = [];
+
+                let ids = '';
+                this.multipleSelection.forEach(selectedItem => {
+                    // 发货请求
+                    ids += selectedItem.orderId + ',';
+                });
+                let params = {
+                    ids: ids
+                };
+                console.log(this.ids);
+                _this.$confirm('此操作将批量发货, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    _this.$axios.post('http://localhost:8181/orders/deliveryAll', {},{params: params})
+                        .then(resp => {
+                            console.log(resp);
+                            if (resp.data == 1){
+                                _this.$alert('已发货成功！', '消息', {
+                                    confirmButtonText: '确定',
+                                    callback: action => {
+                                        window.location.reload()
+                                    }
+                                })
+                            }
+                            else {
+                                this.$message({
+                                    type: 'error',
+                                    message: '部分订单发货失败！'
+                                })
+                            }
+                        })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消发货'
+                    })
+                })
+            },
+
+            //取消选择
+            cancelSelection(){
+                this.$refs.multipleTable.clearSelection();
             },
 
             // 点击修改，跳出弹窗,显示数据
-            handleEdit(row) {
+            handleDetail(row) {
                 const _this = this
-                _this.$axios.get('http://localhost:8181/admin/findById/'+row.id).then(function(resp){
-                    // console.log(resp.data)
-                    _this.form = resp.data[0]
-                })
+                console.log(row)
+                this.form = row
+
                 this.editVisible = true;
             },
-            // 保存修改，更新数据到数据库
-            saveEdit(formName) {
-                this.editVisible = false;
 
-                const _this = this
-                this.$refs[formName].validate((valid) => {
-                    if (valid){
-                        console.log(_this.form)
-                        _this.$axios.put('http://localhost:8181/admin/updateById/'+_this.form.id,_this.form).then(function(resp){
-                            if(resp.data == '1'){
-                                _this.$message("修改成功！")
-                                window.location.reload()
-                            }
-                            else {
-                                _this.$message("修改失败！")
-                            }
-                        })
-                    }
-                    else {
-                        return false;
-                    }
-                });
-                // this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-                // this.$set(this.tableData, this.idx, this.form);
-            },
 
             // 分页导航
             handlePageChange(currentPage) {
@@ -330,26 +430,32 @@
     }
 
     .handle-input {
-        width: 200px;
+        width: 220px;
         display: inline-block;
     }
     .table {
         width: 100%;
         font-size: 14px;
     }
-    .blue{
-        color: #409eff;
-    }
-    .red {
-        color: #ff0000;
-    }
     .mr10 {
         margin-right: 10px;
     }
     .input-style{
+        border: 1px solid #eeeeee;
         width: 350px;
         display: inline-block;
-        margin-right: 30px;
-        margin-left: 20px;
+        /*margin-right: 20px;*/
+        margin-left: 50px;
+        margin-bottom: 10px;
+        border-radius: 7px;
+    }
+    .input-style1{
+        border: 1px solid #eeeeee;
+        width: 350px;
+        /*margin-right: 20px;*/
+        margin-left: 50px;
+        font-size: 13px;
+        margin-bottom: 10px;
+        border-radius: 7px;
     }
 </style>
