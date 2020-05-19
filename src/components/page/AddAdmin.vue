@@ -79,6 +79,7 @@
 
 <script>
     export default {
+        inject:['reload'],  //注入依赖
         name: "AddAdmin",
         data() {
             return {
@@ -123,7 +124,7 @@
         },
         watch:{
             $route(){
-                window.location.reload();
+                this.reload()
             }
         },
         methods: {

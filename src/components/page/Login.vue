@@ -2,7 +2,7 @@
     <div class="login-wrap">
         <div class="ms-login">
             <div class="ms-title">系统管理后台</div>
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content" @submit.native.prevent>
 
                 <el-form-item prop="username">
                     <el-input v-model="ruleForm.username" placeholder="用户名" clearable>
@@ -11,7 +11,7 @@
                 </el-form-item>
 
                 <el-form-item prop="password">
-                    <el-input type="password" placeholder="密码" v-model="ruleForm.password" clearable @keyup.enter.native="login()">
+                    <el-input type="password" placeholder="密码" v-model="ruleForm.password" clearable >
                         <el-button slot="prepend" icon="el-icon-lock"></el-button>
                     </el-input>
 
@@ -22,7 +22,7 @@
                 </el-form-item>
 
                 <div class="login-btn">
-                    <el-button type="primary" @click="login('ruleForm')">登录</el-button>
+                    <el-button type="primary" @click="login('ruleForm')" native-type="submit">登录</el-button>
                 </div>
             </el-form>
         </div>
@@ -48,53 +48,37 @@
             };
         },
         methods: {
-            // ...mapMutations(['changeLogin']),
-
             login (formName) {
-                var _this = this
-                // console.log(this.$store)
+                const _this = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         // console.log(_this.ruleForm)
-                        this.$axios.post('http://localhost:8181/admin/login', {
+                        _this.$axios.post('http://localhost:8181/admin/login', {
                             username: this.ruleForm.username,
                             password: this.ruleForm.password
                         })
                             .then(resp => {
                                 console.log(resp)
-                                let admin = resp.config.data
 
-                                // _this.userToken = 'Bearer ' + resp.data.token;
-                                // 将用户token保存到vuex中
-                                // _this.changeLogin({ Authorization:_this.userToken });
-
-                                if (resp.data === 1) {  //帐号密码正确
-                                    // var data = this.loginForm
-                                    // _this.$store.commit("login", admin)
-
-                                    // console.log(this.$store)
-
-                                    localStorage.setItem('ms_username', this.ruleForm.username);
-                                    //跳转至首页
-                                    _this.$message({message:"登录成功！",type:"success"})
-                                    let redirect = decodeURIComponent(_this.$route.query.redirect || '/');  //获取登录成功后要跳转的路由。
-                                    _this.$router.push({
-                                        path: redirect
-                                    })
-                                    // var path = this.$route.query.redirect
-                                    // console.log(path)
-                                    // this.$router.replace({path: path === '/' || path === undefined ? '/homepage' : path})
-                                }
-                                else if (resp.data === 2){
-                                    _this.$message("登录失败，该帐号已被删除！")
-                                }
-                                else if (resp.data === 3){
-                                    _this.$message({message:"该帐号已被冻结，请联系超级管理员！",type:"warning"})
+                                if(resp.data.success == false){
+                                    if(resp.data.message == 0){
+                                        _this.$message({message:"登录失败，用户名或密码错误！",type:"error"})
+                                    }
+                                    else if (resp.data.message == 1){
+                                        _this.$message("登录失败，该帐号已被删除！")
+                                    }
+                                    else if (resp.data.message == 2){
+                                        _this.$message({message:"该帐号已被冻结，请联系超级管理员！",type:"warning"})
+                                    }
                                 }
                                 else {
-                                    // _this.$message("用户名或密码错误！")
-                                    _this.$message({message:"登录失败，用户名或密码错误！",type:"error"})
+                                    sessionStorage.setItem('ms_username',resp.data.data.username);
+                                    sessionStorage.setItem('admin_rank',resp.data.data.admin_rank);
+                                    _this.$message({message:"登录成功！",type:"success"})
+
+                                    _this.$router.push({ path: _this.redirect || '/' }, onComplete => { }, onAbort => { })
                                 }
+
                             })
                             .catch(failResponse => {
                             })

@@ -8,7 +8,8 @@
                 <transition name="move" mode="out-in">
                     <!--                    被包裹在keep-alive中的组件的状态将会被保留-->
                     <!--                    include属性表示只有name属性为tagsList，tagsList的组件会被缓存，（注意是组件的名字，不是路由的名字）-->
-                    <keep-alive :include="tagsList">
+                    <keep-alive :include="tagsList" v-if="isRouterAlive">
+<!--                        <router-view ></router-view>-->
                         <router-view></router-view>
                     </keep-alive>
                 </transition>
@@ -25,10 +26,16 @@
     import vTags from './Tags.vue';
     import bus from './bus';
     export default {
+        provide(){
+            return{
+                reload:this.reload
+            }
+        },
         data() {
             return {
                 tagsList: [],
-                collapse: false
+                collapse: false,
+                isRouterAlive:true
             };
         },
         components: {
@@ -49,6 +56,15 @@
                 }
                 this.tagsList = arr;
             });
+        },
+        methods:{
+            reload(){
+                this.isRouterAlive = false
+            // $nextTick 是在下次 DOM 更新循环结束之后执行延迟回调，在修改数据之后使用 $nextTick，则可以在回调中获取更新后的 DOM
+                this.$nextTick(function () {
+                    this.isRouterAlive = true
+                })
+            },
         }
     };
 </script>

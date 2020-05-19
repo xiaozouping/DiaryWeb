@@ -25,7 +25,7 @@
             }
         },
         created(){
-            this.username = localStorage.getItem('ms_username');
+            this.username = sessionStorage.getItem('ms_username');
         },
         methods: {
 

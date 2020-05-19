@@ -18,23 +18,6 @@
                     </el-tooltip>
                 </div>
 
-                <!-- 消息中心 -->
-                <!--                <div class="btn-bell">-->
-
-                <!--                    <el-tooltip-->
-                <!--                        effect="dark"-->
-                <!--                        :content="message?`有${message}条未读消息`:`消息中心`"-->
-                <!--                        placement="bottom"-->
-                <!--                    >-->
-                <!--&lt;!&ndash;                        跳转到tabs页面&ndash;&gt;-->
-                <!--                        <router-link to="/messagecenter">-->
-                <!--                            <i class="el-icon-bell"></i>-->
-                <!--                        </router-link>-->
-                <!--                    </el-tooltip>-->
-                <!--&lt;!&ndash;                    如果message为true则显示,false不显示!&ndash;&gt;-->
-                <!--                    <span class="btn-bell-badge" v-if="message"></span>-->
-                <!--                </div>-->
-
                 <!-- 用户头像 -->
                 <div class="user-avator">
                     <img src="../../assets/img/img.jpg" />
@@ -48,9 +31,6 @@
                     </span>
                     <!--                    下拉菜单内容-->
                     <el-dropdown-menu slot="dropdown">
-                        <!--                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">-->
-                        <!--                            <el-dropdown-item>项目仓库</el-dropdown-item>-->
-                        <!--                        </a>-->
                         <el-dropdown-item command="changepwd">修改密码</el-dropdown-item>
                         <el-dropdown-item command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
@@ -72,19 +52,30 @@
         },
         computed: {
             username() {
-                let username = localStorage.getItem('ms_username');
+                let username = sessionStorage.getItem('ms_username');
                 return username ? username : this.name;
             }
         },
         methods: {
             // 用户名下拉菜单选择事件
             handleCommand(command) {
+                const _this = this
                 if (command == 'loginout') {
-                    localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
-                    this.$router.push('/login');  //跳转到login
+                    _this.$confirm('是否退出登录?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        sessionStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
+                        sessionStorage.removeItem('admin_rank')
+                        _this.$message({message:"成功注销！",type:"success"})
+                        _this.$router.push('/login');  //跳转到login
+                    }).catch(() => {
+
+                    })
+
                 }
                 else if (command == 'changepwd'){
-                    // localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
                     this.$router.push('/changepwd');  //跳转到login
                 }
             },

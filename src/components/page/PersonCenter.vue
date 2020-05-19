@@ -9,9 +9,7 @@
         </div>
         <div class="container" >
 
-        <!-- 修改弹出框 -->
-
-            <el-form ref="form" :model="form" :rules="rules" label-width="100px" >
+            <el-form ref="form" :model="form" :rules="rules" label-width="100px" v-loading="loading">
 
                 <el-form-item label="用户名：" class="input-style">
                     <el-input v-model="form.username" disabled></el-input>
@@ -50,7 +48,7 @@
                 </el-form-item>
 
                 <el-form-item style="margin-top: 50px;align-items: center">
-                    <el-button type="primary" @click="submitForm('form')">修改</el-button>
+                    <el-button type="primary" @click="submitForm('form')" >修改</el-button>
                 </el-form-item>
 
             </el-form>
@@ -64,6 +62,7 @@
         name: "PersonCenter",
         data(){
             return{
+                loading: true,
                 rules: {
                     realname: [ { required: true, message: '请输入真实姓名', trigger: 'blur' } ],
                     password: [
@@ -88,11 +87,11 @@
         created() {
 
             const _this = this
-            _this.form.username = localStorage.getItem('ms_username');
+            _this.form.username = sessionStorage.getItem('ms_username');
             _this.$axios.post('http://localhost:8181/admin/findpersonal',_this.form).then(function (resp) {
                 // console.log(resp.data)
-                _this.form = resp.data
-                // _this.loading = false
+                _this.form = resp.data,
+                _this.loading = false;
             })
 
         },
@@ -109,7 +108,8 @@
                                     window.location.reload()
                                 }
                                 else {
-                                    _this.$message("修改失败！")
+                                    _this.$message("修改失败！");
+                                    _this.loadbtn = true;
                                 }
                             })
                     }

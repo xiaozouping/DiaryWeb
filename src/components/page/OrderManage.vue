@@ -34,6 +34,8 @@
                 height="430px"
                 class="table"
                 ref="multipleTable"
+                :row-style="{height:'30px'}"
+                :cell-style="{padding:'4px 0'}"
                 v-loading="loading"
                 header-cell-class-name="table-header"
                 @selection-change="handleSelectionChange"
@@ -48,8 +50,6 @@
                         <div style="color:#409eff;text-decoration:underline;cursor:pointer;" @click="handleDetail(scope.row)">{{ scope.row.orderNo }}</div>
                     </template>
                 </el-table-column>
-
-                <!--                <el-table-column prop="orderNo" label="订单编号" align="center"></el-table-column>-->
 
                 <el-table-column prop="works_title" label="作品名称" align="center"width="200px">
                     <template slot-scope="scope">
@@ -109,17 +109,17 @@
                 </el-table-column>
             </el-table>
 
-            <!--            <div class="pagination">-->
-            <!--                &lt;!&ndash;@current-change点击绑定按钮&ndash;&gt;-->
-            <!--                <el-pagination-->
-            <!--                    background-->
-            <!--                    layout="total, prev, pager, next"-->
-            <!--                    :current-page="pagination.page"-->
-            <!--                    :page-size="pagination.size"-->
-            <!--                    :total="pagination.total"-->
-            <!--                    @current-change="handlePageChange"-->
-            <!--                ></el-pagination>-->
-            <!--            </div>-->
+            <div class="pagination">
+                <!--@current-change点击绑定按钮-->
+                <el-pagination
+                    background
+                    layout="total, prev, pager, next"
+                    :current-page="pagination.page"
+                    :page-size="pagination.size"
+                    :total="pagination.total"
+                    @current-change="handlePageChange"
+                ></el-pagination>
+            </div>
         </div>
 
         <!-- 订单详情弹出框 -->
@@ -207,6 +207,7 @@
 
 <script>
     export default {
+        inject:['reload'],  //注入依赖
         name: 'OrderManage',
         data() {
             return {
@@ -216,38 +217,25 @@
                 editVisible: false,
 
                 //查询条件
-                orderStatus:null,
-                orderNo:null,
-                userPhone:null,
+                orderStatus:'',
+                orderNo:'',
+                userPhone:'',
 
                 //初始分页条件
                 pagination: {
                     page: 1,
-                    size: 10,
+                    size: 7,
                     total: 0,
+                    pageSize:7,
+                    currentPage:1
                 },
-
-                pageIndex: 1,   //页面起始位置
-                pageSize: '',
-                pageTotal: '',
-                form: {},
-                idx: -1,  //选中信息的id
-                id: -1
+                form: {}
             };
         },
         created() {
-            const _this = this
-            _this.$axios.get('http://localhost:8181/orders/getorder').then(function (resp) {
-                // console.log(resp.data)
-                _this.tableData = resp.data
-                _this.loading = false
-
-                // _this.pageSize = resp.data.size
-                // _this.pageTotal = resp.data.totalElements
-            })
+            this.getList(this.pagination.page);
         },
         methods: {
-
             //失效帐号不可选
             selectTrue(row, column){
                 if(row.orderStatus == "0"){
@@ -259,26 +247,8 @@
 
             // 触发搜索按钮
             handleSearch() {
-                // console.log(this.orderStatus);
-                // console.log(this.orderNo);
-                // console.log(this.userPhone);
-                const _this = this;
-                if(!_this.orderStatus){
-                    _this.admin_state=null;
-                }
-                _this.$axios.get("http://localhost:8181/orders/searchorder",{
-                    params: {
-                        orderStatus: _this.orderStatus,
-                        orderNo:_this.orderNo,
-                        userPhone:_this.userPhone
-                    }
-                }).then(function (result) {
-                    console.log(result.data)
-                    _this.tableData = result.data
-
-                }).catch(function (error) {
-                    console.log(error)
-                })
+                this.loading = true
+                this.getList(this.pagination.page);
             },
 
             // 发货操作
@@ -296,7 +266,7 @@
                                 _this.$alert('发货成功！', '消息', {
                                     confirmButtonText: '确定',
                                     callback: action => {
-                                        window.location.reload()
+                                        _this.reload()
                                     }
                                 })
                             }
@@ -329,7 +299,7 @@
                             console.log(resp)
                             if (resp.data==1){
                                 _this.$message({message:"取消成功！",type:"success"})
-                                window.location.reload()
+                                _this.reload()
 
                             }
                             else {
@@ -371,7 +341,7 @@
                                 _this.$alert('已发货成功！', '消息', {
                                     confirmButtonText: '确定',
                                     callback: action => {
-                                        window.location.reload()
+                                        _this.reload()
                                     }
                                 })
                             }
@@ -408,12 +378,28 @@
             // 分页导航
             handlePageChange(currentPage) {
                 // alert(currentPage);
+                this.loading = true
+                this.getList(currentPage);
+            },
+
+            getList(nowpage){
                 const _this = this
-                _this.$axios.get('http://localhost:8181/admin/findAll/'+(currentPage-1)+'/4').then(function (resp) {
-                    console.log(resp)
-                    _this.tableData = resp.data.content
-                    _this.pageSize = resp.data.size
-                    _this.pageTotal = resp.data.totalElements
+                _this.$axios.get("http://localhost:8181/orders/getorder",{
+                    params: {
+                        orderStatus: _this.orderStatus,
+                        orderNo:_this.orderNo,
+                        userPhone:_this.userPhone,
+                        currentPage:nowpage,
+                        pageSize:_this.pagination.pageSize
+                    }
+                }).then(function (result) {
+                    console.log(result.data)
+                    _this.tableData = result.data.list;
+                    _this.pagination.total = result.data.total
+                    _this.loading = false
+
+                }).catch(function (error) {
+                    console.log(error)
                 })
             }
         }
@@ -457,5 +443,8 @@
         font-size: 13px;
         margin-bottom: 10px;
         border-radius: 7px;
+    }
+    .pagination{
+        margin-bottom: 0;
     }
 </style>

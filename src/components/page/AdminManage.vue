@@ -31,7 +31,6 @@
                 <el-button type="primary" @click="handleSearch">查询</el-button>
             </div>
 
-            <!-- 表头单元格的 className 的回调方法，也可以使用字符串为所有表头单元格设置一个固定的 className。-->
             <el-table
                 :data="tableData"
                 border
@@ -39,6 +38,8 @@
                 class="table"
                 ref="multipleTable"
                 v-loading="loading"
+                :row-style="{height:'30px'}"
+                :cell-style="{padding:'7px 0'}"
                 header-cell-class-name="table-header"
                 @selection-change="handleSelectionChange"
             >
@@ -99,24 +100,24 @@
                 </el-table-column>
             </el-table>
 
-            <!--            分页-->
-            <!--            <div class="pagination">-->
-            <!--                &lt;!&ndash;@current-change点击绑定按钮&ndash;&gt;-->
-            <!--                <el-pagination-->
-            <!--                    background-->
-            <!--                    layout="total, prev, pager, next"-->
-            <!--                    :current-page="pagination.page"-->
-            <!--                    :page-size="pagination.size"-->
-            <!--                    :total="pagination.total"-->
-            <!--                    @current-change="handlePageChange"-->
-            <!--                ></el-pagination>-->
-            <!--            </div>-->
+<!--                        分页-->
+            <div class="pagination">
+                <!--@current-change点击绑定按钮-->
+                <el-pagination
+                    background
+                    layout="total, prev, pager, next"
+                    :current-page="pagination.page"
+                    :page-size="pagination.size"
+                    :total="pagination.total"
+                    @current-change="handlePageChange"
+                ></el-pagination>
+            </div>
         </div>
 
         <!-- 修改弹出框 -->
         <el-dialog title="修改" :visible.sync="editVisible" width="60%">
 
-            <el-form ref="form" :model="form" :rules="rules" label-width="100px" >
+            <el-form ref="form" :model="form" :rules="rules" label-width="100px" v-loading="onload">
 
                 <el-form-item label="用户名：" class="input-style">
                     <el-input v-model="form.username" disabled></el-input>
@@ -179,6 +180,7 @@
 
 <script>
     export default {
+        inject:['reload'],  //注入依赖
         name: 'AdminManage',
         data() {
             return {
@@ -252,6 +254,7 @@
 
                 ],
                 loading: true,
+                onload:true,
                 rules: {
                     password: [
                         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -272,16 +275,18 @@
                 editVisible: false,  //弹框显示初始状态
 
                 //查询条件
-                username:null,
-                realname:null,
-                admin_state:null,
-                admin_rank:null,
+                username:'',
+                realname:'',
+                admin_state:'',
+                admin_rank:'',
 
                 //初始分页条件
                 pagination: {
                     page: 1,
-                    size: 10,
+                    size: 7,
                     total: 0,
+                    pageSize:7,
+                    currentPage:1
                 },
 
                 //多选框数组
@@ -289,24 +294,18 @@
                 delarr: '', //存放删除的数据
 
                 form: {},
-                idx: -1,  //选中信息的id
-                id: -1,
+                //是否刷新token
+                needRef: false,
 
             };
         },
         created() {
-            // window.location.reload()
-            const _this = this
-            _this.$axios.get('http://localhost:8181/admin/getadmin').then(function (resp) {
-                // console.log(resp.data)
-                _this.tableData = resp.data
-                _this.loading = false
-            })
+            this.getList(this.pagination.page);
 
         },
         watch:{
             $route(){
-                window.location.reload();
+                this.reload()
             }
         },
         methods: {
@@ -330,27 +329,8 @@
                 // console.log(this.realname);
                 // console.log(this.admin_state);
                 // console.log(this.admin_rank);
-                const _this = this;
-                if(!_this.admin_state){
-                    _this.admin_state=null;
-                }
-                if(!_this.admin_rank){
-                    _this.admin_rank=null;
-                }
-                _this.$axios.get("http://localhost:8181/admin/searchadmin",{
-                    params: {
-                        username: _this.username,
-                        realname:_this.realname,
-                        admin_state:_this.admin_state,
-                        admin_rank:_this.admin_rank
-                    }
-                }).then(function (result) {
-                    console.log(result.data)
-                    _this.tableData = result.data
-
-                }).catch(function (error) {
-                    console.log(error)
-                })
+                this.loading = true
+                this.getList(this.pagination.page);
             },
 
             // 删除操作
@@ -366,7 +346,7 @@
                             _this.$alert('已删除成功！', '消息', {
                                 confirmButtonText: '确定',
                                 callback: action => {
-                                    window.location.reload()
+                                    _this.reload()
                                 }
                             })
                         })
@@ -405,7 +385,7 @@
                                 _this.$alert('已删除成功！', '消息', {
                                     confirmButtonText: '确定',
                                     callback: action => {
-                                        window.location.reload()
+                                        _this.reload()
                                     }
                                 })
                             }
@@ -435,6 +415,7 @@
                 _this.$axios.get('http://localhost:8181/admin/findById/'+row.id).then(function(resp){
                     // console.log(resp.data)
                     _this.form = resp.data[0]
+                    _this.onload = false;
                 })
                 this.editVisible = true;
             },
@@ -449,7 +430,7 @@
                         _this.$axios.put('http://localhost:8181/admin/updateById',this.form).then(function(resp){
                             if(resp.data == '1'){
                                 _this.$message({message:"修改成功！",type:"success"})
-                                window.location.reload()
+                                _this.reload()
                             }
                             else {
                                 _this.$message({message:"修改失败！",type:"error"})
@@ -465,12 +446,30 @@
             // 分页导航
             handlePageChange(currentPage) {
                 // alert(currentPage);
+                this.loading = true
+                this.getList(currentPage);
+
+            },
+
+            getList(nowpage){
                 const _this = this
-                _this.$axios.get('http://localhost:8181/admin/findAll/'+(currentPage-1)+'/4').then(function (resp) {
-                    console.log(resp)
-                    _this.tableData = resp.data.content
-                    _this.pageSize = resp.data.size
-                    _this.pageTotal = resp.data.totalElements
+                _this.$axios.get("http://localhost:8181/admin/getadmin",{
+                    params: {
+                        username: _this.username,
+                        realname:_this.realname,
+                        admin_state:_this.admin_state,
+                        admin_rank:_this.admin_rank,
+                        currentPage:nowpage,
+                        pageSize:_this.pagination.pageSize
+                    }
+                }).then(function (result) {
+                    console.log(result.data)
+                    _this.tableData = result.data.list;
+                    _this.pagination.total = result.data.total
+                    _this.loading = false
+
+                }).catch(function (error) {
+                    console.log(error)
                 })
             }
         }
@@ -493,7 +492,13 @@
     .table {
         width: 100%;
         font-size: 14px;
+
     }
+    /*.table>>>td{*/
+    /*    padding:7px 2px ;*/
+    /*    height: 30px;*/
+    /*    line-height: 30px;*/
+    /*}*/
     .blue{
         color: #409eff;
     }
@@ -508,5 +513,8 @@
         display: inline-block;
         margin-right: 30px;
         margin-left: 20px;
+    }
+    .pagination{
+        margin-bottom: 0;
     }
 </style>

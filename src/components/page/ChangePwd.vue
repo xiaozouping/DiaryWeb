@@ -62,7 +62,7 @@
         created() {
 
             const _this = this;
-            _this.form.username = localStorage.getItem('ms_username');
+            _this.form.username = sessionStorage.getItem('ms_username');
         },
         methods: {
             submitForm(formName) {
@@ -76,7 +76,8 @@
                             .then(function(resp){
                                 if(resp.data == '1'){
                                     _this.$message({message:"修改成功，请重新登录！",type:"success"});
-                                    localStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
+                                    sessionStorage.removeItem('ms_username');   //移除本地存储中的ms_username数据
+                                    sessionStorage.removeItem('admin_rank');
                                     _this.$router.push('/login');
                                 }
                                 else {
